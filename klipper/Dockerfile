@@ -41,10 +41,10 @@ RUN ${MOONRAKER_VENV_DIR}/bin/pip install -r moonraker/scripts/moonraker-require
 
 # Install moonraker-telegram-bot
 RUN git clone --single-branch --branch ${MOONRAKER_TELEGRAM_BOT_BRANCH} https://github.com/willuk2010/moonraker-telegram-bot.git moonraker-telegram-bot
-RUN [ ! -d ${MOONRAKER_TELEGRAM_BOT_BRANCH} ] && python3 -m venv ${MOONRAKER_VENV_DIR}
-RUN ${MOONRAKER_TELEGRAM_BOT_BRANCH}/bin/python -m pip install pip -U
-RUN ${MOONRAKER_TELEGRAM_BOT_BRANCH}/bin/pip install wheel gpiod
-RUN ${MOONRAKER_TELEGRAM_BOT_BRANCH}/bin/pip install -r moonraker-telegram-bot/scripts/requirements.txt
+RUN [ ! -d ${MOONRAKER_TELEGRAM_BOT_VENV_DIR} ] && python3 -m venv ${MOONRAKER_VENV_DIR}
+RUN ${MOONRAKER_TELEGRAM_BOT_VENV_DIR}/bin/python -m pip install pip -U
+RUN ${MOONRAKER_TELEGRAM_BOT_VENV_DIR}/bin/pip install wheel gpiod
+RUN ${MOONRAKER_TELEGRAM_BOT_VENV_DIR}/bin/pip install -r moonraker-telegram-bot/scripts/requirements.txt
 
 FROM python:3.10-slim-bullseye as image
 
