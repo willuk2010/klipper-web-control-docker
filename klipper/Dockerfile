@@ -1,13 +1,15 @@
 FROM python:3.10-bullseye as builder
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG KLIPPER_BRANCH="master"
+ARG KLIPPER_BRANCH="prusamini"
 ARG MOONRAKER_BRANCH="master"
+ARG MOONRAKER_TELEGRAM_BOT_BRANCH="master"
 
 ARG USER=klippy
 ARG HOME=/home/${USER}
 ARG KLIPPER_VENV_DIR=${HOME}/klippy-env
 ARG MOONRAKER_VENV_DIR=${HOME}/moonraker-env
+ARG MOONRAKER_TELEGRAM_BOT_VENV_DIR=${HOME}/moonraker-telegram-bot-env
 
 RUN useradd -d ${HOME} -ms /bin/bash ${USER}
 RUN apt-get update && \
@@ -24,7 +26,7 @@ USER ${USER}
 WORKDIR ${HOME}
 
 ### Klipper setup ###
-RUN git clone --single-branch --branch ${KLIPPER_BRANCH} https://github.com/Klipper3d/klipper.git klipper
+RUN git clone --single-branch --branch ${KLIPPER_BRANCH} https://github.com/willuk2010/klipper.git klipper
 RUN [ ! -d ${KLIPPER_VENV_DIR} ] && virtualenv -p python2 ${KLIPPER_VENV_DIR}
 RUN ${KLIPPER_VENV_DIR}/bin/python -m pip install pip -U
 RUN ${KLIPPER_VENV_DIR}/bin/pip install wheel
@@ -35,8 +37,14 @@ RUN git clone --single-branch --branch ${MOONRAKER_BRANCH} https://github.com/Ar
 RUN [ ! -d ${MOONRAKER_VENV_DIR} ] && python3 -m venv ${MOONRAKER_VENV_DIR}
 RUN ${MOONRAKER_VENV_DIR}/bin/python -m pip install pip -U
 RUN ${MOONRAKER_VENV_DIR}/bin/pip install wheel gpiod
-
 RUN ${MOONRAKER_VENV_DIR}/bin/pip install -r moonraker/scripts/moonraker-requirements.txt
+
+# Install moonraker-telegram-bot
+RUN git clone --single-branch --branch ${MOONRAKER_TELEGRAM_BOT_BRANCH} https://github.com/willuk2010/moonraker-telegram-bot.git moonraker-telegram-bot
+RUN [ ! -d ${MOONRAKER_TELEGRAM_BOT_BRANCH} ] && python3 -m venv ${MOONRAKER_VENV_DIR}
+RUN ${MOONRAKER_TELEGRAM_BOT_BRANCH}/bin/python -m pip install pip -U
+RUN ${MOONRAKER_TELEGRAM_BOT_BRANCH}/bin/pip install wheel gpiod
+RUN ${MOONRAKER_TELEGRAM_BOT_BRANCH}/bin/pip install -r moonraker-telegram-bot/scripts/requirements.txt
 
 FROM python:3.10-slim-bullseye as image
 
