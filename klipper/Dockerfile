@@ -13,7 +13,7 @@ ARG MOONRAKER_TELEGRAM_BOT_VENV_DIR=${HOME}/moonraker-telegram-bot-env
 
 RUN useradd -d ${HOME} -ms /bin/bash ${USER}
 RUN apt-get update && \
-    apt-get install -y locales git sudo wget curl gzip tar python2 virtualenv python-dev libffi-dev build-essential libncurses-dev libusb-dev gpiod python3-virtualenv python3-dev libopenjp2-7 python3-libgpiod liblmdb-dev libsodium-dev
+    apt-get install -y locales git sudo wget curl gzip tar python2 virtualenv python-dev libffi-dev build-essential libncurses-dev libusb-dev gpiod python3-virtualenv python3-dev python3-cryptography python3-gevent libopenjp2-7 python3-libgpiod liblmdb-dev libsodium-dev
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen
 RUN locale-gen
@@ -69,6 +69,9 @@ RUN apt-get update && \
     python3-libgpiod \
     rsync \
     supervisor \
+    x264 \
+    libx264-dev \
+    libwebp-dev \
     zlib1g-dev && \
     sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen && \
@@ -86,6 +89,7 @@ ARG HOME=/home/${USER}
 ENV CONFIG_DIR=${HOME}/.config
 ENV KLIPPER_VENV_DIR=${HOME}/klippy-env
 ENV MOONRAKER_VENV_DIR=${HOME}/moonraker-env
+ENV MOONRAKER_TELEGRAM_BOT_VENV_DIR=${HOME}/moonraker-telegram-bot-env
 
 ARG DEVICE_GROUP=device
 ARG DEVICE_GID=987
@@ -117,8 +121,10 @@ COPY --chown=${USER}:${USER} --from=builder ${HOME}/klipper ${HOME}/klipper
 COPY --chown=${USER}:${USER} --from=builder ${KLIPPER_VENV_DIR} ${KLIPPER_VENV_DIR}
 COPY --chown=${USER}:${USER} --from=builder ${HOME}/moonraker ${HOME}/moonraker
 COPY --chown=${USER}:${USER} --from=builder ${MOONRAKER_VENV_DIR} ${MOONRAKER_VENV_DIR}
+COPY --chown=${USER}:${USER} --from=builder ${HOME}/moonraker-telegram-bot ${HOME}/moonraker-telegram-bot
+COPY --chown=${USER}:${USER} --from=builder ${MOONRAKER_TELEGRAM_BOT_VENV_DIR} ${MOONRAKER_TELEGRAM_BOT_VENV_DIR}
 COPY --chown=${USER}:${USER} config ${CONFIG_DIR}
 
-COPY klipper/supervisord.conf /etc/supervisord/conf.d/supervisord.conf
-COPY klipper/*.ini /etc/supervisord/
+COPY supervisord.conf /etc/supervisord/conf.d/supervisord.conf
+COPY *.ini /etc/supervisord/
 CMD ["supervisord", "-c", "/etc/supervisord/conf.d/supervisord.conf"]
